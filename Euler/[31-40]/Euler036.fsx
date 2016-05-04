@@ -16,7 +16,7 @@ let euler36 =
     let maxPalindromeProduct = 
         numbers
         |> Seq.filter isPalindrome
-        |> Seq.filter (fun x -> isPalindrome(toByte))
+        |> Seq.filter (fun x -> isPalindrome(toByte(x)))
         |> Seq.sum
 
     maxPalindromeProduct
