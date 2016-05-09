@@ -1,22 +1,38 @@
-﻿let euler48 =
-    let numbers = [1I..1000I]
+﻿open System
+
+let euler48 =
+    let numbers = Seq.unfold (fun x -> Some(x, x + 1I)) 2I
     
-    let selfPower (n:bigint) =
-        pown n (int32 n)
+    let factors n = 
+        let upperBound = bigint(sqrt(double n))
+        {2I..upperBound}
+        |> Seq.filter (fun x -> n % x = 0I)
+
+    let isPrime n = 
+        factors(n) 
+        |> Seq.isEmpty
     
-    let selfPowers = 
-        numbers
-        |> Seq.map selfPower
-        |> Seq.sum
+    let primeNumbers = numbers |> Seq.filter isPrime |> Seq.cache
+    
+    let rec getPrimeFactors acc n =       
+        if n = 1I then acc
+        else 
+            let denominator = primeNumbers |> Seq.filter (fun x -> n % x = 0I) |> Seq.head
+            getPrimeFactors (acc @ [denominator]) (n/denominator) 
+
+    let primeFactors n = getPrimeFactors []
+    
+    let distinctPrimeFactorsCount n = 
+        (getPrimeFactors [] n) 
+        |> Seq.distinct 
+        |> Seq.length
         
     let result = 
-        selfPowers.ToString().ToCharArray()
-        |> Seq.rev
-        |> Seq.take 10
-        |> Seq.rev
-        |> Seq.map string
-            
-    String.concat "" result
-    
+        numbers
+        |> Seq.windowed 4
+        |> Seq.find (fun x -> x |> Seq.forall (fun y -> distinctPrimeFactorsCount y = 4)) 
+        |> Seq.take 1
+
+    result
 
 printfn "%A" euler48
