@@ -23,7 +23,6 @@ let euler42 =
         |> Seq.concat
         |> Seq.map normalizeWord
         |> Seq.sort
-        // |> Seq.iter (fun x -> printfn "%A" x)
         |> Seq.map nameScore
         |> Seq.filter isPentagonal
         |> Seq.length
