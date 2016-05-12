@@ -14,4 +14,5 @@ let euler56 =
         |> Seq.max
   
     result
+
 printfn "%A" euler56
