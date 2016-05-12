@@ -1,6 +1,5 @@
 ﻿let euler49 =
-    let min = 100
-    let max = 1000
+    let max = 9999
     
     let factors n = 
         let upperBound = int32(sqrt(double n))
@@ -21,6 +20,12 @@
     | [] -> [[]]
     | e::xs -> List.collect (distribute e) (permute xs)
 
+    let rec combinations n list = 
+        match n, list with
+        | 0, _ -> [[]]
+        | _, [] -> []
+        | k, (head::tail) -> List.map ((@) [head]) (combinations (k-1) tail) @ combinations k tail
+
     let convertToString x =
         x |> List.map (fun y -> (string y))
     
@@ -31,33 +36,31 @@
         int32 x  
 
     let numberPermutations number =
-        printfn "%A===============" number
         let digits = number.ToString().ToCharArray() |> Array.toList
-                        
-        let permutations = 
-            permute digits
-            |> List.map convertToString
-            |> List.map stringConcat
-            |> List.map toInt32
-        
-        match permutations.Length with
-        | 3 ->
-            permutations 
-            |> Seq.filter (fun x -> x <= max && primeNumbers |> Seq.contains x)
-            |> Seq.sort
-            |> Seq.distinct
-            |> Seq.windowed 2
-            |> Seq.iter (fun x -> printfn "%A" x)
-        | _ ->         printfn "%A===============" number
-
-             
-
+   
+        permute digits
+        |> List.distinct
+        |> List.map convertToString
+        |> List.map stringConcat
+        |> List.map toInt32
+        |> List.filter (fun x -> isPrime x && x > 1000)     
+        |> List.sort    
+    
     let result = 
         primeNumbers 
-        |> Seq.map (fun x -> numberPermutations x ) 
-        |> Seq.length
-        // |> Seq.iter (fun x -> printfn "%A" x)
+        |> Seq.map numberPermutations
+        |> Seq.filter (fun x -> x |> List.length >= 3)
+        |> Seq.distinct
+        |> Seq.toList
+        |> Seq.collect (fun list -> combinations 3 list |> List.filter (fun x -> x.[1] - x.[0] = x.[2] - x.[1]))
+        |> Seq.filter (fun x -> x |> Seq.length > 0)
+        |> Seq.skip 1
+        |> Seq.collect (fun x -> x)
+        |> Seq.map (fun x -> x.ToString())
+
     
-    result
+    String.concat "" result
 
 printfn "%A" euler49
+
+
