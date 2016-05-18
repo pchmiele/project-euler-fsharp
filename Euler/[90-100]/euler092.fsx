@@ -1,8 +1,9 @@
 open System.Collections.Generic
 
 let euler92 =
-    let numbers = [1..9999999]
-    let map = dict
+    let max = 9999999
+    let numbers = [1..max]
+
     let numberAsListOfDigits number = 
         number.ToString().ToCharArray()
         |> Seq.map (fun x -> int32(x.ToString()))
@@ -15,32 +16,19 @@ let euler92 =
         |> squareAllmembers
         |> Seq.sum
     
-    let rec squareDigitChainArriveAt89 (chain:Dictionary<int32,bool>) number =       
-        match number with
-        | 1 -> false
-        | number when chain.ContainsKey(number) -> true
-        | _ -> squareDigitChainArriveAt89 chain (numberAsSumOfSureDigits number)
+    let rec squareDigitChainArriveAt89 (cache:bool option array) (chain:list<int32>) number =       
+        let isCached = cache.[number]
+        match isCached with
+        | Some value -> 
+                chain |> List.iter (fun x -> cache.[x] <- Some(value))
+                value
+        | None -> squareDigitChainArriveAt89 cache (chain @ [number]) (numberAsSumOfSureDigits number)
 
-    let rec squareDigitChains numbers (acc:Dictionary<int32,bool>) = 
-        match numbers with
-        | [] -> acc
-        | [head] ->
-            let arriveAt89 = squareDigitChainArriveAt89 acc head
-            match arriveAt89 with
-            | true -> 
-                acc.Add(head, true)
-                squareDigitChains [] acc 
-            | false -> squareDigitChains [] acc
-        | head::tail ->
-            let arriveAt89 = squareDigitChainArriveAt89 acc head
-            match arriveAt89 with
-            | true -> 
-                acc.Add(head, true)
-                squareDigitChains tail acc
-            | false -> squareDigitChains tail acc 
-
-    let dict = new Dictionary<int32, bool>()
-    let result = squareDigitChains numbers dict |> Seq.length
+    let cache = Array.init ((numberAsSumOfSureDigits max) + 1) (fun n -> match n with | 1 -> Some(false) | 89 -> Some(true) | _ -> None)
+    let result = 
+        numbers
+        |> Seq.filter (fun x -> squareDigitChainArriveAt89 cache [] (numberAsSumOfSureDigits x))
+        |> Seq.length
     
     result 
 
